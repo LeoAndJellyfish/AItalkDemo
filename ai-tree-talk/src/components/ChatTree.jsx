@@ -1,16 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import useChat from '../hooks/useChat';
 import { jsPlumb } from 'jsplumb';
+import React, { useEffect, useState } from 'react';
+import useChat from '../hooks/useChat';
 
 const ChatTreeJsPlumb = () => {
   const [input, setInput] = useState('');
   const { messages, sendMessage } = useChat();
-  const jsPlumbInstance = useRef(null);
-  const containerRef = useRef(null);
 
   useEffect(() => {
-    // 初始化 jsPlumb 实例
-    jsPlumbInstance.current = jsPlumb.getInstance({
+    const instance = jsPlumb.getInstance({
       Connector: ["Straight"],
       PaintStyle: { stroke: "#BDC3C7", strokeWidth: 2 },
       Endpoint: ["Dot", { radius: 5 }],
@@ -18,16 +15,9 @@ const ChatTreeJsPlumb = () => {
       Container: "chat-tree", // 指定容器
     });
 
-    return () => {
-      jsPlumbInstance.current.reset(); // 清除连接
-    };
-  }, []);
-
-  useEffect(() => {
-    const instance = jsPlumbInstance.current;
-
-    // 清除之前的节点和连接
-    instance.reset();
+    // 清除之前的连接和节点
+    const container = document.getElementById("chat-tree");
+    container.innerHTML = ''; // 清空容器
 
     // 创建消息节点
     messages.forEach((msg, index) => {
@@ -56,14 +46,14 @@ const ChatTreeJsPlumb = () => {
       // 将文本节点添加到消息节点
       node.appendChild(textNode);
 
-      // 计算节点的位置
+      // 计算节点的位置，避免重叠
       const x = 100; // 初始水平位置
       const y = 100 + index * 80; // 垂直间隔
       node.style.left = `${x}px`;
       node.style.top = `${y}px`;
 
       // 将节点添加到容器中
-      containerRef.current.appendChild(node);
+      container.appendChild(node);
 
       // 添加拖拽功能
       instance.draggable(nodeId, {
@@ -83,7 +73,11 @@ const ChatTreeJsPlumb = () => {
     // 设置容器
     instance.setContainer("chat-tree");
 
-  }, [messages]); // 依赖 messages
+    return () => {
+      instance.reset(); // 清除连接
+      container.innerHTML = ''; // 清空容器
+    };
+  }, [messages]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -98,7 +92,6 @@ const ChatTreeJsPlumb = () => {
       <h2 style={{ textAlign: 'center' }}>Chat with AI</h2>
       <div
         id="chat-tree"
-        ref={containerRef}
         style={{
           position: 'relative',
           height: '400px',

@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "axios": "^0.21.1",
-        "drawflow": "^0.0.60",
+        "jsplumb": "^2.15.6",
         "react": "^18.0.0",
         "react-dom": "^18.0.0",
         "react-scripts": "5.0.0"
@@ -32,5 +32,8 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
+    },
+    "devDependencies": {
+        "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
     }
 }
