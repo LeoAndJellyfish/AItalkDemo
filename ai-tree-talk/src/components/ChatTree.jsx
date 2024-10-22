@@ -47,8 +47,8 @@ const ChatTreeJsPlumb = () => {
       node.appendChild(textNode);
 
       // 计算节点的位置，避免重叠
-      const x = 100; // 初始水平位置
-      const y = 100 + index * 80; // 垂直间隔
+      const x = 20; // 小幅度调整初始水平位置
+      const y = 20 + index * 80; // 垂直间隔
       node.style.left = `${x}px`;
       node.style.top = `${y}px`;
 
@@ -88,20 +88,21 @@ const ChatTreeJsPlumb = () => {
   };
 
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h2 style={{ textAlign: 'center' }}>Chat with AI</h2>
       <div
         id="chat-tree"
         style={{
           position: 'relative',
           height: '400px',
+          width: '80%', // 设定宽度
           border: '2px solid #2C3E50',
           borderRadius: '8px',
           marginTop: '20px',
           overflow: 'hidden',
         }}
       />
-      <form onSubmit={handleSubmit} style={{ marginTop: '10px', textAlign: 'center' }}>
+      <form onSubmit={handleSubmit} style={{ marginTop: '10px', textAlign: 'center', width: '80%' }}>
         <input
           type="text"
           value={input}
@@ -109,7 +110,7 @@ const ChatTreeJsPlumb = () => {
           placeholder="Type your message"
           style={{
             padding: '10px',
-            width: '60%',
+            width: '70%', // 设定输入框的宽度
             borderRadius: '4px',
             border: '1px solid #BDC3C7',
           }}
