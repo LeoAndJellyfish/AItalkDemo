@@ -14,37 +14,53 @@ import { useCallback, useState } from 'react';
 import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
-// 定义 Message 类型
-type Message = {
-  role: string;  // 角色（user 或 assistant）
-  content: string; // 消息内容
-};
+let nid = 1;
+let lasnid = 1;
+const getId = () => ++nid;
+
 
 export default function App() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((edges) => addEdge(connection, edges)),
     [setEdges]
   );
-  const [messages, setMessages] = useState<Message[]>([]); // 用于存储聊天记录
   const [input, setInput] = useState("");// 用户输入
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  // 获取apiKey
+  const addNewEdge = (source: string, target: string) => {
+    const newEdge = {
+      id: `${source}->${target}`, // 边的唯一 ID
+      source, // 源节点 ID
+      target, // 目标节点 ID
+    };
+    setEdges((eds) => addEdge(newEdge, eds)); // 添加新边
+  };
+  const addNode = (position: { x: number; y: number }, data: { label: string }) => {
+    lasnid = nid;
+    let tmpid = getId();
+    const newNode = {
+      id: `${tmpid}`, 
+      type: 'default',
+      position,
+      data,
+    };
+    setNodes((nds) => nds.concat(newNode));
+    addNewEdge(`${lasnid}`, `${tmpid}`);
+  };
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
     if (input.trim() === "") return;  // 防止发送空消息
 
+    addNode({ x: 50, y: 70 },{ label: input })// 添加用户节点
     // 构建请求体
     const data = {
-        model: "yi-large",
-        messages: [
-            ...messages,  // 将之前的消息包含在内
-            { role: "user", content: input }  // 新用户消息
-        ],
+        model: "yi-lightning",
+        messages: [{ role: "user", content: input }],// TODO: 将之前的消息包含在内
         temperature: 0.3,  // 控制回复的创造性
     };
-
+    setInput("");// 清空输入框
     try {
         // 调用 Lingyi Wanwu API
         const response = await axios.post(
@@ -57,15 +73,9 @@ export default function App() {
                 },
             }
         );
-
         // 获取 AI 的回复
         const aiReply = response.data.choices[0].message.content.trim();
-
-        // 更新消息列表
-        setMessages([...messages, { role: "user", content: input }, { role: "assistant", content: aiReply }]);
-
-        // 清空输入框
-        setInput("");
+        addNode({ x: 50, y: 70 },{ label: aiReply })
     } catch (error) {
         console.error("Error fetching AI response:", error);
     }

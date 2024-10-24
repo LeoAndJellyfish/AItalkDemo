@@ -1,9 +1,6 @@
-import type { NodeTypes } from '@xyflow/react';
+import type { Node, NodeTypes } from '@xyflow/react';
 
-import { PositionLoggerNode } from './PositionLoggerNode';
-import { AppNode } from './types';
-
-export const initialNodes: AppNode[] = [
+export const initialNodes: Node[] = [
   {
     id: '0',
     type: 'input',
@@ -19,6 +16,5 @@ export const initialNodes: AppNode[] = [
 ];
 
 export const nodeTypes = {//存放自定义节点类型
-  'position-logger': PositionLoggerNode,
   // Add any of your custom nodes here!
 } satisfies NodeTypes;
