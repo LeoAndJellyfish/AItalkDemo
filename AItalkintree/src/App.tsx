@@ -6,6 +6,7 @@ import {
   addEdge,
   useEdgesState,
   useNodesState,
+  type Node,
   type OnConnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -17,7 +18,7 @@ import { initialNodes, nodeTypes } from './nodes';
 let nid = 1;
 let lasnid = 1;
 const getId = () => ++nid;
-
+var branch = false;
 
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -28,6 +29,10 @@ export default function App() {
   );
   const [input, setInput] = useState("");// 用户输入
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  // 获取apiKey
+  const handleNodeClick = (event:any, node: Node) => {
+    lasnid = Number(node.id); // 更新 lastId 为当前选中节点的 ID
+    branch=true;
+  };
   const addNewEdge = (source: string, target: string) => {
     const newEdge = {
       id: `${source}->${target}`, // 边的唯一 ID
@@ -37,7 +42,7 @@ export default function App() {
     setEdges((eds) => addEdge(newEdge, eds)); // 添加新边
   };
   const addNode = (position: { x: number; y: number }, data: { label: string }) => {
-    lasnid = nid;
+    if(!branch)lasnid = nid;
     let tmpid = getId();
     const newNode = {
       id: `${tmpid}`, 
@@ -47,6 +52,7 @@ export default function App() {
     };
     setNodes((nds) => nds.concat(newNode));
     addNewEdge(`${lasnid}`, `${tmpid}`);
+    branch=false;
   };
 
   // 发送消息并获取 AI 回复
@@ -92,6 +98,7 @@ export default function App() {
         edgeTypes={edgeTypes}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDoubleClick={handleNodeClick}
         fitView
       >
         <Background />
