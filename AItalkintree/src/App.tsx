@@ -12,7 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import axios from "axios";
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
@@ -23,38 +23,43 @@ export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [input, setInput] = useState("");
-  const [lastNode, setLastNode] = useState<Node>(initialNodes[1]); // 初始为根节点
+  const lastNodeRef = useRef<Node>(initialNodes[1]); // 使用 useRef 存储最后节点
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((edges) => addEdge(connection, edges)),
+    (connection) => setEdges((eds) => addEdge(connection, eds)),
     [setEdges]
   );
 
   // 点击节点时，将当前节点设置为“最后节点”
   const handleNodeClick = useCallback((event: any, node: Node) => {
-    setLastNode(node);
+    lastNodeRef.current = node; // 更新 lastNodeRef
   }, []);
 
   // 添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
   const addNode = useCallback((position: { x: number; y: number }, label: string) => {
+    const currentLastNode = lastNodeRef.current; // 获取当前的 lastNode
     const newNode = {
       id: getId(),
       type: 'default',
       position,
       data: { label },
     };
+
     setNodes((nds) => [...nds, newNode]);
-    setEdges((eds) => addEdge({ id: `${lastNode.id}->${newNode.id}`, source: lastNode.id, target: newNode.id }, eds));
-    setLastNode(newNode); // 更新“最后节点”
-  }, [lastNode, setNodes, setEdges]);
+    setEdges((eds) => addEdge({ id: `${currentLastNode.id}->${newNode.id}`, source: currentLastNode.id, target: newNode.id }, eds));
+    lastNodeRef.current = newNode; // 更新 lastNodeRef 为新添加的节点
+  }, [setNodes, setEdges]);
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
     if (input.trim() === "") return;
 
-    // 添加用户消息节点，并自动更新“最后节点”
-    addNode({ x: lastNode.position.x, y: lastNode.position.y + 70 }, `User: ${input}`);
+    // 设定用户消息节点的位置
+    const userNodePosition = { x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 };
+    // 添加用户消息节点
+    addNode(userNodePosition, `User: ${input}`);
+
     setInput(""); // 清空输入框
 
     // 构建请求体
@@ -78,8 +83,10 @@ export default function App() {
       );
 
       const aiReply = response.data.choices[0].message.content.trim();
-      // 添加 AI 回复节点并更新“最后节点”
-      addNode({ x: lastNode.position.x, y: lastNode.position.y + 70 }, `AI: ${aiReply}`);
+
+      // 添加 AI 回复节点
+      addNode({ x: userNodePosition.x, y: userNodePosition.y + 70 }, `AI: ${aiReply}`);
+
     } catch (error) {
       console.error("Error fetching AI response:", error);
     }
