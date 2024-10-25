@@ -24,15 +24,14 @@ export default function App() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [input, setInput] = useState("");
   const lastNodeRef = useRef<Node>(initialNodes[1]); // 使用 useRef 存储最后节点
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((eds) => addEdge(connection, eds)),
     [setEdges]
   );
 
   // 点击节点时，将当前节点设置为“最后节点”
-  const handleNodeClick = useCallback((event: any, node: Node) => {
+  const handleNodeClick = useCallback((_event: any, node: Node) => {
     lastNodeRef.current = node; // 更新 lastNodeRef
   }, []);
 
@@ -81,7 +80,6 @@ export default function App() {
       );
 
       const aiReply = response.data.choices[0].message.content.trim();
-
       // 添加 AI 回复节点
       addNode({ x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 }, `AI: ${aiReply}`);
 
