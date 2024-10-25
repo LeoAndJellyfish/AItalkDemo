@@ -4,9 +4,11 @@ import {
   MiniMap,
   Panel,
   ReactFlow,
+  ReactFlowProvider,
   addEdge,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Node,
   type OnConnect,
 } from '@xyflow/react';
@@ -17,19 +19,19 @@ import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
 let nid = 1;
-const getId = () => `${++nid}`;
 
-export default function App() {
+function Flow() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [input, setInput] = useState("");
   const lastNodeRef = useRef<Node>(initialNodes[1]); // 使用 useRef 存储最后节点
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const reactFlowInstance = useReactFlow();
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((eds) => addEdge(connection, eds)),
     [setEdges]
   );
-
+  const getId = () => `${++nid}`;
   // 点击节点时，将当前节点设置为“最后节点”
   const handleNodeClick = useCallback((_event: any, node: Node) => {
     lastNodeRef.current = node; // 更新 lastNodeRef
@@ -44,8 +46,7 @@ export default function App() {
       position,
       data: { label },
     };
-
-    setNodes((nds) => [...nds, newNode]);
+    reactFlowInstance.addNodes(newNode);
     setEdges((eds) => addEdge({ id: `${currentLastNode.id}->${newNode.id}`, source: currentLastNode.id, target: newNode.id }, eds));
     lastNodeRef.current = newNode; // 更新 lastNodeRef 为新添加的节点
   }, [setNodes, setEdges]);
@@ -88,33 +89,46 @@ export default function App() {
     }
   };
 
+  return(
+    <ReactFlow
+      nodes={nodes}
+      nodeTypes={nodeTypes}
+      onNodesChange={onNodesChange}
+      edges={edges}
+      edgeTypes={edgeTypes}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onNodeDoubleClick={handleNodeClick}
+      fitView
+    >
+      <Background />
+      <MiniMap />
+      <Controls />
+      <Panel position="bottom-center">
+        <input 
+          id="user-input" 
+          type="text" 
+          value={input} 
+          onChange={(e) => setInput(e.target.value)} 
+          placeholder="Type your message..." 
+        />
+        <button id="send-btn" onClick={sendMessage}>Send</button>
+      </Panel>
+    </ReactFlow>
+  );
+}
+ 
+
+
+
+
+
+export default function App() {
   return (
     <div style={{ position: 'relative', height: '100vh' }}>
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeDoubleClick={handleNodeClick}
-        fitView
-      >
-        <Background />
-        <MiniMap />
-        <Controls />
-        <Panel position="bottom-center">
-          <input 
-            id="user-input" 
-            type="text" 
-            value={input} 
-            onChange={(e) => setInput(e.target.value)} 
-            placeholder="Type your message..." 
-          />
-          <button id="send-btn" onClick={sendMessage}>Send</button>
-        </Panel>
-      </ReactFlow>
+      <ReactFlowProvider>
+        <Flow />
+      </ReactFlowProvider>
     </div>
   );
 }
