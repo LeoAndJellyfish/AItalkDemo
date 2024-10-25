@@ -47,7 +47,7 @@ function Flow() {
       data: { label },
     };
     reactFlowInstance.addNodes(newNode);
-    setEdges((eds) => addEdge({ id: `${currentLastNode.id}->${newNode.id}`, source: currentLastNode.id, target: newNode.id }, eds));
+    reactFlowInstance.addEdges({ id: `${currentLastNode.id}->${newNode.id}`, source: currentLastNode.id, target: newNode.id });
     lastNodeRef.current = newNode; // 更新 lastNodeRef 为新添加的节点
   }, [setNodes, setEdges]);
 
@@ -65,6 +65,7 @@ function Flow() {
       model: "yi-lightning",
       messages: [{ role: "user", content: input }],
       temperature: 0.3,
+      max_tokens: 100,
     };
 
     try {
