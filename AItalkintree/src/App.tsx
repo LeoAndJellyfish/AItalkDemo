@@ -17,87 +17,73 @@ import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
 let nid = 1;
-const getId = () => ++nid;
-var lastnode = {
-  id: '1', 
-  position:{x:50,y:70},
-}
+const getId = () => `${++nid}`;
 
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [input, setInput] = useState("");// 用户输入
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  // 获取apiKey
+  const [input, setInput] = useState("");
+  const [lastNode, setLastNode] = useState<Node>(initialNodes[1]); // 初始为根节点
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((edges) => addEdge(connection, edges)),
     [setEdges]
   );
 
-  const handleNodeClick = (event:any, node: Node) => {// TODO: 更改样式
-    if(node.id){// 更新 lastId 为当前选中节点的 ID(根节点除外，添加到id1的节点)
-      lastnode.id = node.id;
-      lastnode.position = node.position;
-    }
-    else{
-      lastnode.id = '1';
-      lastnode.position = { x: 50, y: 70 };
-    }
-  };
+  // 点击节点时，将当前节点设置为“最后节点”
+  const handleNodeClick = useCallback((event: any, node: Node) => {
+    setLastNode(node);
+  }, []);
 
-  const addNewEdge = (source: string, target: string) => {
-    const newEdge = {
-      id: `${source}->${target}`, // 边的唯一 ID
-      source, // 源节点 ID
-      target, // 目标节点 ID
-    };
-    setEdges((eds) => addEdge(newEdge, eds)); // 添加新边
-  };
-
-  const addNode = (position: { x: number; y: number }, data: { label: string }) => {
-    let tmpid = getId();
+  // 添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
+  const addNode = useCallback((position: { x: number; y: number }, label: string) => {
     const newNode = {
-      id: `${tmpid}`, 
+      id: getId(),
       type: 'default',
       position,
-      data,
+      data: { label },
     };
-    setNodes((nds) => nds.concat(newNode));
-    addNewEdge(lastnode.id, `${tmpid}`);
-    lastnode = newNode;
-  };
+    setNodes((nds) => [...nds, newNode]);
+    setEdges((eds) => addEdge({ id: `${lastNode.id}->${newNode.id}`, source: lastNode.id, target: newNode.id }, eds));
+    setLastNode(newNode); // 更新“最后节点”
+  }, [lastNode, setNodes, setEdges]);
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
-    if (input.trim() === "") return;  // 防止发送空消息
+    if (input.trim() === "") return;
 
-    addNode({ x: lastnode.position.x, y: lastnode.position.y+70 },{ label: `User:${input}` })// 添加用户节点
+    // 添加用户消息节点，并自动更新“最后节点”
+    addNode({ x: lastNode.position.x, y: lastNode.position.y + 70 }, `User: ${input}`);
+    setInput(""); // 清空输入框
+
     // 构建请求体
     const data = {
-        model: "yi-lightning",
-        messages: [{ role: "user", content: input }],// TODO: 将之前的消息包含在内
-        temperature: 0.3,  // 控制回复的创造性
+      model: "yi-lightning",
+      messages: [{ role: "user", content: input }],
+      temperature: 0.3,
     };
-    setInput("");// 清空输入框
+
     try {
-        // 调用 Lingyi Wanwu API
-        const response = await axios.post(
-            "https://api.lingyiwanwu.com/v1/chat/completions",
-            data,
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${apiKey}`, // 使用 API 密钥
-                },
-            }
-        );
-        // 获取 AI 的回复
-        const aiReply = response.data.choices[0].message.content.trim();
-        addNode({ x: lastnode.position.x, y: lastnode.position.y+70 },{ label: `AI:${aiReply}` })// 添加 AI 节点
+      // 调用 Lingyi Wanwu API
+      const response = await axios.post(
+        "https://api.lingyiwanwu.com/v1/chat/completions",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
+          },
+        }
+      );
+
+      const aiReply = response.data.choices[0].message.content.trim();
+      // 添加 AI 回复节点并更新“最后节点”
+      addNode({ x: lastNode.position.x, y: lastNode.position.y + 70 }, `AI: ${aiReply}`);
     } catch (error) {
-        console.error("Error fetching AI response:", error);
+      console.error("Error fetching AI response:", error);
     }
   };
-
 
   return (
     <div style={{ position: 'relative', height: '100vh' }}>
