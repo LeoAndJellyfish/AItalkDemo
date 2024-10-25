@@ -2,6 +2,7 @@ import {
   Background,
   Controls,
   MiniMap,
+  Panel,
   ReactFlow,
   addEdge,
   useEdgesState,
@@ -16,23 +17,33 @@ import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
 let nid = 1;
-let lasnid = 1;
 const getId = () => ++nid;
-var branch = false;
+var lastnode = {
+  id: '1', 
+  position:{x:50,y:70},
+}
 
 export default function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [input, setInput] = useState("");// 用户输入
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  // 获取apiKey
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((edges) => addEdge(connection, edges)),
     [setEdges]
   );
-  const [input, setInput] = useState("");// 用户输入
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;  // 获取apiKey
-  const handleNodeClick = (event:any, node: Node) => {
-    lasnid = Number(node.id); // 更新 lastId 为当前选中节点的 ID
-    branch=true;
+
+  const handleNodeClick = (event:any, node: Node) => {// TODO: 更改样式
+    if(node.id){// 更新 lastId 为当前选中节点的 ID(根节点除外，添加到id1的节点)
+      lastnode.id = node.id;
+      lastnode.position = node.position;
+    }
+    else{
+      lastnode.id = '1';
+      lastnode.position = { x: 50, y: 70 };
+    }
   };
+
   const addNewEdge = (source: string, target: string) => {
     const newEdge = {
       id: `${source}->${target}`, // 边的唯一 ID
@@ -41,8 +52,8 @@ export default function App() {
     };
     setEdges((eds) => addEdge(newEdge, eds)); // 添加新边
   };
+
   const addNode = (position: { x: number; y: number }, data: { label: string }) => {
-    if(!branch)lasnid = nid;
     let tmpid = getId();
     const newNode = {
       id: `${tmpid}`, 
@@ -51,15 +62,15 @@ export default function App() {
       data,
     };
     setNodes((nds) => nds.concat(newNode));
-    addNewEdge(`${lasnid}`, `${tmpid}`);
-    branch=false;
+    addNewEdge(lastnode.id, `${tmpid}`);
+    lastnode = newNode;
   };
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
     if (input.trim() === "") return;  // 防止发送空消息
 
-    addNode({ x: 50, y: 70 },{ label: input })// 添加用户节点
+    addNode({ x: lastnode.position.x, y: lastnode.position.y+70 },{ label: `User:${input}` })// 添加用户节点
     // 构建请求体
     const data = {
         model: "yi-lightning",
@@ -81,7 +92,7 @@ export default function App() {
         );
         // 获取 AI 的回复
         const aiReply = response.data.choices[0].message.content.trim();
-        addNode({ x: 50, y: 70 },{ label: aiReply })
+        addNode({ x: lastnode.position.x, y: lastnode.position.y+70 },{ label: `AI:${aiReply}` })// 添加 AI 节点
     } catch (error) {
         console.error("Error fetching AI response:", error);
     }
@@ -104,17 +115,17 @@ export default function App() {
         <Background />
         <MiniMap />
         <Controls />
+        <Panel position="bottom-center">
+          <input 
+            id="user-input" 
+            type="text" 
+            value={input} 
+            onChange={(e) => setInput(e.target.value)} 
+            placeholder="Type your message..." 
+          />
+          <button id="send-btn" onClick={sendMessage}>Send</button>
+        </Panel>
       </ReactFlow>
-      <div id="chat-box" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50px', backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <input 
-          id="user-input" 
-          type="text" 
-          value={input} 
-          onChange={(e) => setInput(e.target.value)} 
-          placeholder="Type your message..." 
-        />
-        <button id="send-btn" onClick={sendMessage}>Send</button>
-      </div>
     </div>
   );
 }

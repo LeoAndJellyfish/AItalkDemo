@@ -11,7 +11,7 @@ export const initialNodes: Node[] = [
     id: '1',
     type: 'default',
     position: { x: 50, y: 70 },
-    data: { label: '嗨，你好！' },
+    data: { label: 'AI:嗨，你好！有什么我可以帮你的？' },
   },
 ];
 
