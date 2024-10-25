@@ -55,10 +55,8 @@ export default function App() {
   const sendMessage = async () => {
     if (input.trim() === "") return;
 
-    // 设定用户消息节点的位置
-    const userNodePosition = { x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 };
     // 添加用户消息节点
-    addNode(userNodePosition, `User: ${input}`);
+    addNode({ x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 }, `User: ${input}`);
 
     setInput(""); // 清空输入框
 
@@ -85,7 +83,7 @@ export default function App() {
       const aiReply = response.data.choices[0].message.content.trim();
 
       // 添加 AI 回复节点
-      addNode({ x: userNodePosition.x, y: userNodePosition.y + 70 }, `AI: ${aiReply}`);
+      addNode({ x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 }, `AI: ${aiReply}`);
 
     } catch (error) {
       console.error("Error fetching AI response:", error);
