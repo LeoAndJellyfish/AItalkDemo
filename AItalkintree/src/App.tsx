@@ -109,7 +109,7 @@ export default function App() {
         edgeTypes={edgeTypes}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeDoubleClick={handleNodeClick}
+        onNodeClick={handleNodeClick}
         fitView
       >
         <Background />
