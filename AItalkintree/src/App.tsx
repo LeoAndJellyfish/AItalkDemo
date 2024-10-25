@@ -5,12 +5,10 @@ import {
   Panel,
   ReactFlow,
   ReactFlowProvider,
-  addEdge,
   useEdgesState,
   useNodesState,
   useReactFlow,
   type Node,
-  type OnConnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import axios from "axios";
@@ -18,28 +16,25 @@ import { useCallback, useRef, useState } from 'react';
 import { edgeTypes, initialEdges } from './edges';
 import { initialNodes, nodeTypes } from './nodes';
 
-let nid = 1;
+var nid = 1;
 
 function Flow() {
+  const reactFlowInstance = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [input, setInput] = useState("");
-  const lastNodeRef = useRef<Node>(initialNodes[1]); // 使用 useRef 存储最后节点
+  const currentLastNode = useRef(initialNodes[1]);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const reactFlowInstance = useReactFlow();
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  );
   const getId = () => `${++nid}`;
   // 点击节点时，将当前节点设置为“最后节点”
   const handleNodeClick = useCallback((_event: any, node: Node) => {
-    lastNodeRef.current = node; // 更新 lastNodeRef
+    currentLastNode.current = node;
   }, []);
-
+  const onNodeDragStop = useCallback((_event: any, node: Node) => {
+    currentLastNode.current=node; // 更新当前最后节点为移动后的节点
+  }, []);
   // 添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
-  const addNode = useCallback((position: { x: number; y: number }, label: string) => {
-    const currentLastNode = lastNodeRef.current; // 获取当前的 lastNode
+  const addNode = useCallback((position: { x: number; y: number }, label: string,sourse?:string) => {
     const newNode = {
       id: getId(),
       type: 'default',
@@ -47,16 +42,17 @@ function Flow() {
       data: { label },
     };
     reactFlowInstance.addNodes(newNode);
-    reactFlowInstance.addEdges({ id: `${currentLastNode.id}->${newNode.id}`, source: currentLastNode.id, target: newNode.id });
-    lastNodeRef.current = newNode; // 更新 lastNodeRef 为新添加的节点
-  }, [setNodes, setEdges]);
+    const sourseId = sourse || currentLastNode.current.id;
+    reactFlowInstance.addEdges({ id: `${sourseId}->${newNode.id}`, source: sourseId, target: newNode.id });
+    currentLastNode.current = newNode;
+    return newNode;
+  }, [setNodes, setEdges, reactFlowInstance, getId, currentLastNode]);
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
     if (input.trim() === "") return;
-
     // 添加用户消息节点
-    addNode({ x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 }, `User: ${input}`);
+    const userMessageNode = addNode({ x: currentLastNode.current.position.x, y: currentLastNode.current.position.y + 70 }, `User: ${input}`);
 
     setInput(""); // 清空输入框
 
@@ -83,7 +79,7 @@ function Flow() {
 
       const aiReply = response.data.choices[0].message.content.trim();
       // 添加 AI 回复节点
-      addNode({ x: lastNodeRef.current.position.x, y: lastNodeRef.current.position.y + 70 }, `AI: ${aiReply}`);
+      addNode({ x: userMessageNode.position.x, y: userMessageNode.position.y + 70 }, `AI: ${aiReply}`, userMessageNode.id);
 
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -98,8 +94,8 @@ function Flow() {
       edges={edges}
       edgeTypes={edgeTypes}
       onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onNodeDoubleClick={handleNodeClick}
+      onNodeClick={handleNodeClick}
+      onNodeDragStop={onNodeDragStop}
       fitView
     >
       <Background />
