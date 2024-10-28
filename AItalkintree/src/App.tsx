@@ -28,7 +28,7 @@ function Flow() {
   const getId = () => `${++nid}`;
   // 点击节点时，将当前节点设置为“最后节点”
   const handleNodeClick = useCallback((_event: any, node: Node) => {
-    currentLastNode.current = node;
+    if(node.id!=='0')currentLastNode.current = node;
   }, []);
   const onNodeDragStop = useCallback((_event: any, node: Node) => {
     if(currentLastNode.current.id===node.id) currentLastNode.current=node; // 更新当前最后节点为移动后的节点
@@ -94,7 +94,7 @@ function Flow() {
       edges={edges}
       edgeTypes={edgeTypes}
       onEdgesChange={onEdgesChange}
-      onNodeClick={handleNodeClick}
+      onNodeDoubleClick={handleNodeClick}
       onNodeDragStop={onNodeDragStop}
       fitView
     >
