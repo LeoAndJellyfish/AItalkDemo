@@ -31,7 +31,7 @@ function Flow() {
     currentLastNode.current = node;
   }, []);
   const onNodeDragStop = useCallback((_event: any, node: Node) => {
-    currentLastNode.current=node; // 更新当前最后节点为移动后的节点
+    if(currentLastNode.current.id===node.id) currentLastNode.current=node; // 更新当前最后节点为移动后的节点
   }, []);
   // 添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
   const addNode = useCallback((position: { x: number; y: number }, label: string,sourse?:string) => {
