@@ -117,14 +117,16 @@ function Flow() {
     }
 
   }, [getChildNodePosition]);
-
+  // 创建临时节点
+  const createTemp = () => {
+    addNode(``);
+  }
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
     if (input.trim() === ""|| isLoading) return;
     setIsLoading(true);
 
     const history = getConversationHistory(currentLastNodeID.current);
-    console.log("获取到的对话历史: ", history); // 打印对话历史
 
     // 添加用户消息节点
     addNode(`User: ${input}`);
@@ -141,7 +143,6 @@ function Flow() {
       temperature: 0.2,
       max_tokens: 500,
     };
-    console.log("发送给 Lingyi Wanwu API 的messages: ", data.messages); // 打印请求体
 
     try {
       // 调用 Lingyi Wanwu API
@@ -191,6 +192,7 @@ function Flow() {
           placeholder="Type your message..." 
         />
         <button id="send-btn" onClick={sendMessage} disabled={isLoading}>Send</button>
+        <button id="createtemp" onClick={createTemp}>创建空白节点</button>
       </Panel>
     </ReactFlow>
   );
@@ -206,3 +208,4 @@ export default function App() {
     </div>
   );
 }
+//TODO: 删除节点;重新连边
