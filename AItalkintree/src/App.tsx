@@ -1,4 +1,5 @@
 import {
+  addEdge,
   Background,
   Controls,
   MiniMap,
@@ -7,8 +8,8 @@ import {
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  useReactFlow,
-  type Node,
+  type Connection,
+  type Node
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import axios from "axios";
@@ -19,7 +20,6 @@ import { initialNodes, nodeTypes } from './nodes';
 var nid = 1;
 
 function Flow() {
-  const reactFlowInstance = useReactFlow();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [input, setInput] = useState("");
@@ -33,6 +33,12 @@ function Flow() {
   const onNodeDragStop = useCallback((_event: any, node: Node) => {
     if(currentLastNode.current.id===node.id) currentLastNode.current=node; // 更新当前最后节点为移动后的节点
   }, []);
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((oldEdges) => addEdge(connection, oldEdges));
+    },
+    [setEdges],
+  );
   // 添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
   const addNode = useCallback((position: { x: number; y: number }, label: string,sourse?:string) => {
     const newNode = {
@@ -41,12 +47,12 @@ function Flow() {
       position,
       data: { label },
     };
-    reactFlowInstance.addNodes(newNode);
+    setNodes((oldNodes) => [...oldNodes, newNode]);
     const sourseId = sourse || currentLastNode.current.id;
-    reactFlowInstance.addEdges({ id: `${sourseId}->${newNode.id}`, source: sourseId, target: newNode.id });
+    setEdges((oldEdges) => addEdge({ id: `${sourseId}->${newNode.id}`, source: sourseId, target: newNode.id }, oldEdges));
     currentLastNode.current = newNode;
     return newNode;
-  }, [setNodes, setEdges, reactFlowInstance, getId, currentLastNode]);
+  }, [setNodes, setEdges, getId, currentLastNode]);
 
   // 发送消息并获取 AI 回复
   const sendMessage = async () => {
@@ -96,6 +102,7 @@ function Flow() {
       onEdgesChange={onEdgesChange}
       onNodeDoubleClick={handleNodeClick}
       onNodeDragStop={onNodeDragStop}
+      onConnect={onConnect}
       fitView
     >
       <Background />
