@@ -2,6 +2,7 @@
   "name": "vite-react-flow-template",
   "version": "0.0.0",
   "type": "module",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
