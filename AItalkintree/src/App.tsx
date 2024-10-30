@@ -25,10 +25,14 @@ const selector = (state: RFState) => ({
   onEdgesChange: state.onEdgesChange,
   addChildNode: state.addChildNode,
   add_Edge:state.add_Edge,
+  saveFlow: state.saveFlow,           // 导入保存和恢复功能
+  restoreFlow: state.restoreFlow,
+  downloadFlow: state.downloadFlow,
+  uploadFlow: state.uploadFlow,
 });
 
 function Flow() {
-  const { nodes, edges, onNodesChange, onEdgesChange, addChildNode,add_Edge } = useStore(
+  const { nodes, edges, onNodesChange, onEdgesChange, addChildNode, add_Edge, saveFlow, restoreFlow, downloadFlow, uploadFlow } = useStore(
     useShallow(selector),
   );
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +48,11 @@ function Flow() {
     if(currentLastNodeID.current===node.id) currentLastNodeID.current=node.id; // 更新当前最后节点为移动后的节点
   }, []);
 
-  
+  const handleFileUpload = (event:any) => {
+    const file = event.target.files[0];
+    if (file) uploadFlow(file);
+  };
+
   const getConversationHistory = (selectedNodeId:string) => {
     const labels = new Set(); // 使用 Set 以避免重复节点
   
@@ -193,6 +201,12 @@ function Flow() {
         />
         <button id="send-btn" onClick={sendMessage} disabled={isLoading}>Send</button>
         <button id="createtemp" onClick={createTemp}>创建空白节点</button>
+      </Panel>
+      <Panel position="top-right">
+        <button onClick={saveFlow}>保存流程</button>
+        <button onClick={restoreFlow}>恢复流程</button>
+        <button onClick={downloadFlow}>下载流程</button>
+        <input type="file" onChange={handleFileUpload} />
       </Panel>
     </ReactFlow>
   );
