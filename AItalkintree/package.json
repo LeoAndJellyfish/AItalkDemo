@@ -2,7 +2,7 @@
   "name": "vite-react-flow-template",
   "version": "0.0.0",
   "type": "module",
-  "homepage": "./",
+  "homepage": "https://leoandjellyfish.github.io/AItalk_liketree/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
