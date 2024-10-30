@@ -50,7 +50,13 @@ function Flow() {
 
   const handleFileUpload = (event:any) => {
     const file = event.target.files[0];
+    currentLastNodeID.current = initialNodes[1].id; // 上传文件后，将当前最后节点设置为“AI:嗨，你好！有什么我可以帮你的？”
     if (file) uploadFlow(file);
+  };
+
+  const restoreFlowHandler = () => {
+    currentLastNodeID.current = initialNodes[1].id; // 恢复流程后，将当前最后节点设置为“AI:嗨，你好！有什么我可以帮你的？”
+    restoreFlow();
   };
 
   const getConversationHistory = (selectedNodeId:string) => {
@@ -204,7 +210,7 @@ function Flow() {
       </Panel>
       <Panel position="top-left">
         <button onClick={saveFlow}>保存流程</button>
-        <button onClick={restoreFlow}>恢复流程</button>
+        <button onClick={restoreFlowHandler}>恢复流程</button>
         <button onClick={downloadFlow}>下载流程</button>
         <input type="file" onChange={handleFileUpload} />
       </Panel>
