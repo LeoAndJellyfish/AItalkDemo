@@ -114,16 +114,16 @@ function Flow() {
   );
 
   //添加新的节点并自动连接到当前“最后节点”，然后更新为新节点
-  const addNode = useCallback((label: string) => {
+  const addNode = useCallback((label: string, parentNodeId?: string) => {
     const { nodeLookup } = store.getState();
-    const parentNode = nodeLookup.get(currentLastNodeID.current);
+    const parentNode = nodeLookup.get(parentNodeId? parentNodeId : currentLastNodeID.current);
     const childNodePosition = getChildNodePosition(parentNode);
 
     if (parentNode && childNodePosition) {
       const sonNode = addChildNode(parentNode, childNodePosition, label);
       currentLastNodeID.current = sonNode.id;
+      return sonNode.id;
     }
-
   }, [getChildNodePosition]);
   // 创建临时节点
   const createTemp = () => {
@@ -137,7 +137,7 @@ function Flow() {
     const history = getConversationHistory(currentLastNodeID.current);
 
     // 添加用户消息节点
-    addNode(`User: ${input}`);
+    const sonid = addNode(`User: ${input}`);
 
     setInput(""); // 清空输入框
 
@@ -167,7 +167,7 @@ function Flow() {
 
       const aiReply = response.data.choices[0].message.content.trim();
       // 添加 AI 回复节点
-      addNode(`AI: ${aiReply}`);
+      addNode(`AI: ${aiReply}`,sonid);
     } catch (error) {
       console.error("Error fetching AI response:", error);
     } finally {
@@ -222,4 +222,3 @@ export default function App() {
     </div>
   );
 }
-//TODO: 删除节点;重新连边
