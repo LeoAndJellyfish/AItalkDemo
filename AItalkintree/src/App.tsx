@@ -202,12 +202,13 @@ function Flow() {
         <button id="send-btn" onClick={sendMessage} disabled={isLoading}>Send</button>
         <button id="createtemp" onClick={createTemp}>创建空白节点</button>
       </Panel>
-      <Panel position="top-right">
+      <Panel position="top-left">
         <button onClick={saveFlow}>保存流程</button>
         <button onClick={restoreFlow}>恢复流程</button>
         <button onClick={downloadFlow}>下载流程</button>
         <input type="file" onChange={handleFileUpload} />
       </Panel>
+      <div id="version" style={{ position: 'absolute', bottom: 0, left: 0, fontSize: 12, color: 'gray' }}>{import.meta.env.VITE_APP_VERSION}</div>
     </ReactFlow>
   );
 }
