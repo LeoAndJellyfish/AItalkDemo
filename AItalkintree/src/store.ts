@@ -10,10 +10,9 @@ import {
   type OnNodesChange,
   type XYPosition,
 } from '@xyflow/react';
+import { nanoid } from 'nanoid/non-secure';
 import { create } from 'zustand';
 
-var nid = 1;
-const getId = () => `${++nid}`;
 const flowKey = "myFlowData"; // 保存到localStorage的键
 
 export type RFState = {
@@ -55,7 +54,7 @@ const useStore = create<RFState>((set, get) => ({
 
   addChildNode: (parentNode: Node, position: XYPosition, label: string) => {
     const newNode = {
-      id: getId(),
+      id: nanoid(),
       type: 'default',
       position,
       data: { label },
