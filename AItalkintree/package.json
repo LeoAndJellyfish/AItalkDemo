@@ -1,6 +1,6 @@
 {
   "name": "vite-react-flow-template",
-  "version": "0.02",
+  "version": "0.06",
   "type": "module",
   "homepage": "https://leoandjellyfish.github.io/AItalk_liketree/",
   "scripts": {
@@ -12,6 +12,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@icon-park/react": "^1.4.2",
     "@xyflow/react": "^12.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

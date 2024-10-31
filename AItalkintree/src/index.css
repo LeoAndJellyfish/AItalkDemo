@@ -10,3 +10,77 @@ body,
   height: 100%;
   margin: 0;
 }
+
+/* 输入框样式 */
+.input-container {
+  position: relative;
+  margin: 20px 0; /* 控制输入框上下间距 */
+}
+
+.styled-input {
+  width: 100%; /* 占满容器宽度 */
+  padding-top: 3%;
+  padding-left: 10px;
+  border: 2px solid #54b270; /* 边框颜色 */
+  border-radius: 25px; /* 圆角边框 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+  font-size: 16px; /* 字体大小 */
+  transition: border-color 0.3s ease; /* 边框颜色的过渡效果 */
+}
+
+.styled-input::placeholder {
+  color: #a9a9a9; /* 占位符颜色 */
+}
+
+.styled-input:focus {
+  outline: none; /* 去掉默认的聚焦轮廓 */
+  border-color: #2e7032; /* 聚焦时边框颜色变化 */
+}
+
+/* 可选：为输入框添加动画效果 */
+.styled-input:focus {
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.287); /* 聚焦时的阴影 */
+}
+
+/* 按钮样式 */
+.white-button {
+  background-color: white; /* 设置背景色为白色 */
+  border: 1px solid #ccc; /* 设置边框颜色 */
+  border-radius: 4px; /* 设置圆角 */
+  cursor: pointer; /* 鼠标指针为手型 */
+  display: 'flex';
+  align-items: 'center';
+  margin-right: 1px; /* 控制按钮右侧间距 */
+  padding-top: 1%;
+  transition: background-color 0.3s; /* 可选：添加过渡效果 */
+}
+
+.white-button:hover {
+  background-color: #f0f0f0; /* 可选：鼠标悬停时的背景色 */
+}
+
+/* 消息提示框样式 */
+.message-bar {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  background-color: rgba(0, 128, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  opacity: 0; /* 初始透明度为 0 */
+  transform: translateX(-50%) translateY(-20px); /* 初始位置稍微下移 */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.message-bar.show {
+  opacity: 1; /* 变为完全可见 */
+  transform: translateX(-50%) translateY(0); /* 归位 */
+}
+
+/* 选中节点样式 */
+.last-node {
+  background-color: #FFD700; /* 例如，给最后一个节点设置金色背景 */
+  border: 2px solid #FF4500; /* 边框颜色变化 */
+}

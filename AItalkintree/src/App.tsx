@@ -1,3 +1,4 @@
+import { AddOne, Back, DownloadOne, FolderUpload, Save, SendOne } from '@icon-park/react';
 import {
   Background,
   Controls,
@@ -31,7 +32,7 @@ const selector = (state: RFState) => ({
   uploadFlow: state.uploadFlow,
 });
 
-function Flow() {
+function Flow({ showMessage }: { showMessage: (message: string) => void }) {
   const { nodes, edges, onNodesChange, onEdgesChange, addChildNode, add_Edge, saveFlow, restoreFlow, downloadFlow, uploadFlow } = useStore(
     useShallow(selector),
   );
@@ -52,11 +53,18 @@ function Flow() {
     const file = event.target.files[0];
     currentLastNodeID.current = initialNodes[1].id; // 上传文件后，将当前最后节点设置为“AI:嗨，你好！有什么我可以帮你的？”
     if (file) uploadFlow(file);
+    showMessage("上传完成");
   };
 
   const restoreFlowHandler = () => {
     currentLastNodeID.current = initialNodes[1].id; // 恢复流程后，将当前最后节点设置为“AI:嗨，你好！有什么我可以帮你的？”
     restoreFlow();
+    showMessage("恢复完成");
+  };
+
+  const saveFlowHandler = () => {
+    saveFlow();
+    showMessage("保存完成");
   };
 
   const getConversationHistory = (selectedNodeId:string) => {
@@ -197,22 +205,35 @@ function Flow() {
       <Background />
       <MiniMap />
       <Controls />
-      <Panel position="bottom-center">
-        <input 
-          id="user-input" 
-          type="text" 
+      <Panel position="bottom-center" style={{ display: 'flex', alignItems: 'center', width: '40%' }}>
+        <textarea 
           value={input} 
           onChange={(e) => setInput(e.target.value)} 
-          placeholder="Type your message..." 
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              if (e.shiftKey) {
+                // 如果同时按下 Shift + Enter，插入换行符
+                setInput(input + "\n");
+              } else {
+                // 否则，发送消息
+                sendMessage();
+                e.preventDefault(); // 阻止默认的回车换行行为
+              }
+            }
+          }}
+          placeholder="请输入..." 
+          className="styled-input"
+          style={{ flex: 1, marginRight: '8px', resize: 'none'  }} 
         />
-        <button id="send-btn" onClick={sendMessage} disabled={isLoading}>Send</button>
-        <button id="createtemp" onClick={createTemp}>创建空白节点</button>
+        <button id="send-btn" onClick={sendMessage} disabled={isLoading} className="white-button"><SendOne theme="filled" size="30" fill="#54b270"/></button>
+        <button id="createtemp" onClick={createTemp} className="white-button"><AddOne theme="filled" size="30" fill="#54b270"/></button>
       </Panel>
       <Panel position="top-left">
-        <button onClick={saveFlow}>保存流程</button>
-        <button onClick={restoreFlowHandler}>恢复流程</button>
-        <button onClick={downloadFlow}>下载流程</button>
-        <input type="file" onChange={handleFileUpload} />
+        <button onClick={saveFlowHandler} className="white-button"><Save theme="filled" size="30" fill="#54b270"/></button>
+        <button onClick={restoreFlowHandler} className="white-button"><Back theme="filled" size="30" fill="#54b270"/></button>
+        <button onClick={downloadFlow} className="white-button"><DownloadOne theme="filled" size="30" fill="#54b270"/></button>
+        <button onClick={() => document.getElementById('file-upload')?.click()} className="white-button"><FolderUpload theme="filled" size="30" fill="#54b270"/></button>
+        <input type="file" onChange={handleFileUpload} style={{ display: 'none' }} id="file-upload" />
       </Panel>
       <div id="version" style={{ position: 'absolute', bottom: 0, left: 0, fontSize: 12, color: 'gray' }}>{import.meta.env.VITE_APP_VERSION}</div>
     </ReactFlow>
@@ -221,10 +242,30 @@ function Flow() {
  
 
 export default function App() {
+  const [message, setMessage] = useState("");
+
+  // 定义 showMessage 函数
+  function showMessage(mes: string) {
+    setMessage(mes);
+    const messageBar = document.querySelector('.message-bar');
+    if (messageBar) {
+      messageBar.classList.add('show');
+      // 可选：在一定时间后移除 .show 类
+      setTimeout(() => {
+          messageBar.classList.remove('show');
+      }, 1000); // 5秒后自动消失
+    } else {
+      console.error("未找到 .message-bar 元素");
+    }
+  }
+  
   return (
     <div style={{ position: 'relative', height: '100vh' }}>
+      <div className="message-bar">
+        {message}
+      </div>
       <ReactFlowProvider>
-        <Flow />
+        <Flow showMessage={showMessage} />
       </ReactFlowProvider>
     </div>
   );
