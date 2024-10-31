@@ -78,9 +78,3 @@ body,
   opacity: 1; /* 变为完全可见 */
   transform: translateX(-50%) translateY(0); /* 归位 */
 }
-
-/* 选中节点样式 */
-.last-node {
-  background-color: #FFD700; /* 例如，给最后一个节点设置金色背景 */
-  border: 2px solid #FF4500; /* 边框颜色变化 */
-}

@@ -163,7 +163,7 @@ function Flow({ showMessage }: { showMessage: (message: string) => void }) {
         { role: "user", content: input }
       ],
       temperature: 0.2,
-      max_tokens: 500,
+      max_tokens: 350,
     };
 
     try {
