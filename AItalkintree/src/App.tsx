@@ -141,7 +141,7 @@ function Flow() {
     setIsLoading(true);
 
     const history = getConversationHistory(currentLastNodeID.current);
-
+    console.log("当前对话历史",history);
     // 添加用户消息节点
     const sonid = addNode(`User: ${input}`);
 
