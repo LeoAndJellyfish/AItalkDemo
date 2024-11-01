@@ -1,5 +1,7 @@
 # AI_TIT(AItalkintree)
 a tree-like AI-talk platform
+用树状图的方式展现AI对话，让用户可以自由组合对话历史记录。同时，也能将条理清晰的对话内容分享给他人。
+
 
 demo: https://leoandjellyfish.github.io/AItalk_liketree/
 
