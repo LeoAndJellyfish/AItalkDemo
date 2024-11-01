@@ -9,6 +9,9 @@ jobs:
       image: shangzheny/rth-host-helper:latest
 
     steps:
+      - name: List directory for debugging
+        run: ls -R
+
       - name: Install dependencies
         run: npm install
         working-directory: ./AItalkintree  # 设置项目所在的二级目录
