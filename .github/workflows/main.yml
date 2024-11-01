@@ -9,17 +9,6 @@ jobs:
       image: shangzheny/rth-host-helper:latest
 
     steps:
-      - name: List directory for debugging
-        run: ls -R
-
-      - name: Install dependencies
-        run: npm install
-        working-directory: ./AItalkintree  # 设置项目所在的二级目录
-
-      - name: Build project
-        run: npm run build
-        working-directory: ./AItalkintree  # 在项目目录下构建
-        
       - name: Deploy to Retinbox Web Hosting
         uses: rthsoftware/host-auto-deploy@master
         env:
@@ -27,4 +16,4 @@ jobs:
         with:
           site: "aitalk-liketree.rth5.com"  # 修改 example 为您的网站名称
           build: "build"  # 修改 build 为您的构建命令
-          outdir: "./AItalkintree/dist"  # 修改 dist 为您的构建输出目录
+          outdir: "dist"  # 修改 dist 为您的构建输出目录
