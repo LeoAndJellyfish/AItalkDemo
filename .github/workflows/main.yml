@@ -16,4 +16,4 @@ jobs:
         with:
           site: "aitalk-liketree.rth5.com" 
           build: "build" 
-          outdir: "./AItalkintree/dist"  
+          outdir: "AItalkintree/dist"  
