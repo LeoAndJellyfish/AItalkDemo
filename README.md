@@ -1,5 +1,6 @@
-# AI_TIT(AItalkintree)
-a tree-like AI-talk platform
+# AItalk_liketree(Demo)
+本Demo停止更新，近期将会重构代码，并发布正式版。
+
 用树状图的方式展现AI对话，让用户可以自由组合对话历史记录。同时，也能将条理清晰的对话内容分享给他人。
 
 
